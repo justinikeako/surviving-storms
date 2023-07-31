@@ -50,6 +50,12 @@
 			</g>
 		</symbol>
 
+		<symbol id="menu" viewBox="0 0 24 24">
+			<g>
+				<path d="M3 18V16H21V18H3ZM3 13V11H21V13H3ZM3 8V6H21V8H3Z" />
+			</g>
+		</symbol>
+
 		<symbol id="play" viewBox="0 0 24 24">
 			<g>
 				<path d="M8 19V5L19 12L8 19Z" />

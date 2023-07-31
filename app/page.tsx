@@ -238,14 +238,14 @@ export default function Home() {
 						<div className="mx-auto flex w-fit flex-col gap-12 py-8 sm:mr-0 sm:gap-8 md:flex-row md:items-center lg:w-full lg:justify-center lg:gap-16 2xl:justify-around">
 							<ContainerOrchestratedReveal
 								fadeOnly
-								className="absolute left-0 top-12 aspect-[71/117] w-full shrink-0 opacity-50 xs:w-3/4 sm:w-2/5 md:top-auto md:w-1/3 lg:relative lg:left-auto lg:w-1/5"
+								className="absolute left-0 top-12 aspect-[71/117] w-full shrink-0 xs:w-3/4 sm:w-2/5 md:top-auto md:w-1/3 lg:relative lg:left-auto lg:w-1/5 "
 							>
 								<Image
 									src="/map.png"
 									alt="Unlabeled map of dominica"
 									fill
 									sizes="(max-width: 640px) 95vw, (max-width: 420px) 80vw, (max-width: 768px) 40vw, (max-width: 1024px) 25vw"
-									className="absolute object-contain"
+									className="absolute object-contain opacity-50 lg:opacity-100"
 								/>
 							</ContainerOrchestratedReveal>
 
@@ -491,7 +491,7 @@ export default function Home() {
 							}
 						/>
 
-						<div className="absolute right-0 aspect-[1/2] h-full ">
+						<div className="absolute right-0 -z-10 aspect-[1/2] h-full opacity-25 sm:h-3/4 md:z-auto md:opacity-100 lg:h-full">
 							<Image
 								src="/background-logo.png"
 								alt="Caribbean Cyclone Cartography Logo"
