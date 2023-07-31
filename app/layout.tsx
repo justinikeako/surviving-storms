@@ -15,10 +15,6 @@ export const metadata: Metadata = {
 	title:
 		'Surviving Storms | Making Life Amidst the Environmental Crises of Man',
 	description: 'Mapping Hurricane Hazards, Survivals, and Repair in Dominica',
-	icons: {
-		icon: 'https://survivingstorms.notprimitive.com/favicon.png',
-		apple: 'https://survivingstorms.notprimitive.com/favicon.png',
-	},
 	openGraph: {
 		type: 'website',
 		title: 'Surviving Storms',
