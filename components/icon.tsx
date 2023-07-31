@@ -3,18 +3,18 @@ import { cn } from '~/lib/utils';
 
 type IconProps = React.ComponentProps<'svg'> & {
 	name: string;
-	size?: number;
 };
 
 export const Icon = forwardRef<React.ElementRef<'svg'>, IconProps>(
-	({ name, size = 21, ...props }, ref) => {
+	({ name, ...props }, ref) => {
 		return (
 			<svg
 				{...props}
 				ref={ref}
-				width={size}
-				height={size}
-				className={cn('inline-block fill-current', props.className)}
+				className={cn(
+					'inline-block aspect-square w-[21px] fill-current',
+					props.className,
+				)}
 			>
 				<use href={`/sprite.svg#${name}`} />
 			</svg>

@@ -1,84 +1,69 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { pauseDuration } from '~/constants';
 import { OrchestratedReveal } from './reveal';
+import { useRef } from 'react';
 import Link from 'next/link';
 import { Icon } from './icon';
 import Image from 'next/image';
+import { OrchestratedLineReveal } from './line-reveal';
 
 const MotionImage = motion(Image);
 
 export function Hero() {
+	const containerRef = useRef<HTMLDivElement>(null);
+	const { scrollYProgress } = useScroll({
+		target: containerRef,
+		offset: ['end end', 'end start'],
+	});
+	const scale = useTransform(scrollYProgress, [0, 1], [1.1, 1]);
+
 	return (
 		<section
-			data-transparent-header
-			className="-mx-16 flex h-screen flex-col justify-end gap-4 bg-gray-900 p-16 text-gray-50 sm:flex-row sm:items-end sm:justify-between"
+			ref={containerRef}
+			data-header-dark
+			className="-mx-8 flex h-[calc(100svh+4rem)] flex-col justify-end gap-4 bg-gray-900 px-8 pb-32 text-gray-50 sm:flex-row sm:items-end sm:justify-between md:-mx-16 md:px-16"
 		>
-			<div className="absolute inset-x-0 top-0 h-screen overflow-hidden after:absolute after:inset-0 after:block after:from-gray-900 after:gradient-bottom-left after:bg-radial-gradient">
-				<MotionImage
-					src="/hero.png"
-					alt="A dramatic view of a beach covered in palm trees destroyed by a hurricane."
-					fill
-					className="origin-top object-cover object-center"
-					initial={{ scale: 1.2 }}
-					animate={{ scale: 1.1 }}
-					transition={{
-						type: 'spring',
-						duration: 2,
-						bounce: 0,
-						delay: pauseDuration,
-					}}
-				/>
+			<div className="absolute inset-x-0 top-0 h-[calc(100svh+4rem)] overflow-hidden">
+				<motion.div style={{ scale }} className="h-full w-full">
+					<MotionImage
+						src="/hero.png"
+						alt="A dramatic view of a beach covered in palm trees destroyed by a hurricane."
+						fill
+						className="absolute origin-top object-cover object-center"
+						initial={{ scale: 1.25 }}
+						animate={{ scale: 1.0 }}
+						transition={{
+							type: 'spring',
+							duration: 3,
+							bounce: 0,
+							delay: pauseDuration,
+						}}
+					/>
+				</motion.div>
+
+				<div className="absolute inset-0 block from-gray-900 bg-radial-gradient gradient-bottom-left" />
+
+				<div className="absolute inset-x-0 bottom-0 h-16	bg-gradient-to-t from-gray-100"></div>
+
+				<div className="absolute inset-x-0 bottom-0 h-64 from-black mask-gradient-to-t">
+					<div className="h-full from-transparent to-black radial-farthest-side gradient-top mask-radial-gradient">
+						<div className="h-full bg-gray-100 mask-cover mask-luminance mask-center mask-[url(/painted-mask.png)]"></div>
+					</div>
+				</div>
 			</div>
 
 			<div className="relative space-y-4">
 				<h1 className="font-display text-4xl uppercase xs:text-5xl md:text-6xl lg:text-7xl 2xl:text-8xl">
-					<span className="block overflow-hidden">
-						<motion.span
-							initial={{ y: '100%' }}
-							animate={{ y: '0%' }}
-							transition={{
-								type: 'spring',
-								duration: 1,
-								bounce: 0,
-								delay: pauseDuration + 0.5,
-							}}
-							className="inline-block"
-						>
-							Mapping Hurricane
-						</motion.span>
-					</span>
-					<span className="block overflow-hidden">
-						<motion.span
-							initial={{ y: '100%' }}
-							animate={{ y: '0%' }}
-							transition={{
-								type: 'spring',
-								duration: 1,
-								bounce: 0,
-								delay: pauseDuration + 0.6,
-							}}
-							className="inline-block"
-						>
-							Hazards, Survivals
-						</motion.span>
-					</span>
-					<span className="block overflow-hidden">
-						<motion.span
-							initial={{ y: '100%' }}
-							animate={{ y: '0%' }}
-							transition={{
-								type: 'spring',
-								duration: 1,
-								bounce: 0,
-								delay: pauseDuration + 0.7,
-							}}
-							className="inline-block"
-						>
-							and Repair in Dominica
-						</motion.span>
-					</span>
+					<OrchestratedLineReveal
+						delay={pauseDuration + 0.5}
+						lines={[
+							'Mapping Hurricane',
+							'Hazards, Survivals',
+							'and Repair in Dominica',
+						]}
+					/>
 				</h1>
 				<OrchestratedReveal
 					delay={pauseDuration + 0.8}
@@ -98,24 +83,24 @@ export function Hero() {
 
 			<OrchestratedReveal
 				delay={pauseDuration + 1}
-				className="relative flex h-10 w-fit items-center rounded-full bg-white text-gray-700 ring-1 ring-gray-500/50"
+				className="relative flex h-10 w-fit items-center overflow-hidden rounded-full bg-white text-gray-700 ring-1 ring-gray-500/50"
 			>
 				<Link
-					href="#"
+					href="https://www.instagram.com/cccproject767/"
 					title="Follow Us on Instagram"
-					className="flex h-10 pl-3 pr-2"
+					className="flex h-10 pl-3 pr-2 hover:bg-gray-200 active:bg-gray-300"
 				>
 					<span className="sr-only">Follow Us on Instagram</span>
-					<Icon name="instagram" size={24} className="m-auto" />
+					<Icon name="instagram" className="m-auto w-6" />
 				</Link>
 				<div className="h-full w-px bg-gray-500/50" />
 				<Link
-					href="#"
+					href="https://twitter.com/CCCproject767"
 					title="Follow Us on Twitter"
-					className="flex h-10 pl-2 pr-3"
+					className="flex h-10 pl-2 pr-3 hover:bg-gray-200 active:bg-gray-300"
 				>
 					<span className="sr-only">Follow Us on Twitter</span>
-					<Icon name="twitter" size={24} className="m-auto" />
+					<Icon name="twitter" className="m-auto w-6" />
 				</Link>
 			</OrchestratedReveal>
 		</section>

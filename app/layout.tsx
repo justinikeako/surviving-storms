@@ -12,8 +12,19 @@ const bebasNeue = Bebas_Neue({
 const assistant = Assistant({ subsets: ['latin'], variable: '--font-base' });
 
 export const metadata: Metadata = {
-	title: 'Surviving Storms',
+	title:
+		'Surviving Storms | Making Life Amidst the Environmental Crises of Man',
 	description: 'Mapping Hurricane Hazards, Survivals, and Repair in Dominica',
+	icons: {
+		icon: 'https://survivingstorms.notprimitive.com/logo.png',
+		apple: 'https://survivingstorms.notprimitive.com/logo.png',
+	},
+	openGraph: {
+		type: 'website',
+		title: 'Surviving Storms',
+		description: 'Making Life Amidst the Environmental Crises of Man',
+		images: 'https://survivingstorms.notprimitive.com/og-image.jpg',
+	},
 };
 
 export default function RootLayout({
@@ -25,7 +36,7 @@ export default function RootLayout({
 		<html lang="en">
 			<body
 				className={cn(
-					'bg-gray-100 text-gray-800 selection:bg-yellow-600 selection:text-gray-50',
+					'bg-gray-100 text-gray-800 selection:bg-blue-800/75 selection:text-gray-50',
 					assistant.variable,
 					bebasNeue.variable,
 				)}

@@ -2,10 +2,11 @@
 
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useScroll } from 'framer-motion';
 import Link from 'next/link';
 import { cn } from '~/lib/utils';
 import { pauseDuration, pauseDurationMs } from '~/constants';
+import { Icon } from './icon';
 
 function NavLink({
 	index,
@@ -78,6 +79,8 @@ function Letter({
 }
 
 export function Header() {
+	const letterStagger = 0.025;
+
 	const pathname = usePathname();
 
 	const [showStatic, setShowStatic] = useState(false);
@@ -85,44 +88,36 @@ export function Header() {
 
 	const headerRef = useRef<HTMLDivElement>(null);
 
-	const [isTransparent, setTransparent] = useState(
-		['/', '/quote-studio'].includes(pathname),
-	);
+	const { scrollY } = useScroll();
+	const [isDark, setIsDark] = useState(['/'].includes(pathname));
 
 	useEffect(() => {
 		const headerElement = headerRef.current;
 		if (!headerElement) return;
 
-		const observer = new IntersectionObserver(
-			(entries) => {
-				entries.forEach((entry) => {
-					const isIntersecting =
-						entry.isIntersecting || entry.intersectionRatio > 0;
+		const darkSections =
+			document.querySelectorAll<HTMLDivElement>('[data-header-dark]');
 
-					setTransparent(isIntersecting);
-				});
-			},
-			{ threshold: 0 }, // Adjust the threshold as needed
-		);
+		const headerElementBounds = headerElement.getBoundingClientRect();
+		// Get the position and dimensions of the data-header-dark sections
+		const darkSectionsBounds = Array.from(darkSections).map((section) => ({
+			height: section.getBoundingClientRect().height,
+			offsetTop: section.offsetTop,
+		}));
 
-		const targetElements = document.querySelectorAll(
-			'[data-transparent-header]',
-		);
+		const unsubscribe = scrollY.on('change', (scrollPosition) => {
+			const shouldMakeHeaderDark = darkSectionsBounds.some(
+				(bounds) =>
+					scrollPosition >= bounds.offsetTop - headerElementBounds.height &&
+					scrollPosition <= bounds.offsetTop + bounds.height,
+			);
 
-		targetElements.forEach((targetElement) => {
-			observer.observe(targetElement);
+			if (shouldMakeHeaderDark !== isDark) setIsDark(shouldMakeHeaderDark);
 		});
 
-		if (targetElements.length === 0) setTransparent(false);
+		return () => unsubscribe();
+	}, [scrollY, isDark, pathname]);
 
-		return () => {
-			targetElements.forEach((targetElement) => {
-				observer.unobserve(targetElement);
-			});
-		};
-	}, [pathname]);
-
-	const letterStagger = 0.025;
 	useEffect(() => {
 		const timerId = setTimeout(() => {
 			setIntroAnimationComplete(true);
@@ -136,17 +131,19 @@ export function Header() {
 	return (
 		<header
 			ref={headerRef}
-			data-transparent={isTransparent || undefined}
-			className="fixed inset-x-0 z-20 before:absolute before:inset-0 before:block before:bg-gradient-to-b before:from-gray-900/75 data-[transparent]:text-gray-50"
+			data-dark={isDark || undefined}
+			className="group fixed inset-x-0 z-20 data-[dark]:text-gray-50"
 		>
-			<div className="flex h-20 items-center px-16 2xl:container">
+			<div className="absolute inset-0 block bg-gray-100 from-black transition-colors mask-gradient-to-b group-data-[dark]:bg-gray-900/75" />
+
+			<div className="relative flex h-20 items-center px-8 2xl:container md:px-16">
 				<AnimatePresence>
 					{!introAnimationComplete && (
 						<motion.div
 							initial={{ opacity: 1 }}
 							exit={{ opacity: 0 }}
 							transition={{ duration: 1 }}
-							className="absolute inset-x-0 top-0 z-10 flex h-screen items-center justify-center bg-gray-900"
+							className="absolute inset-x-0 top-0 flex h-screen items-center justify-center bg-gray-900"
 						/>
 					)}
 				</AnimatePresence>
@@ -154,26 +151,21 @@ export function Header() {
 				<div
 					className={cn(
 						!introAnimationComplete &&
-							'absolute inset-x-0 top-0 z-10 flex h-screen text-gray-50',
+							'absolute inset-x-0 top-0 flex h-screen text-gray-50',
 					)}
 				>
-					{showStatic ? (
-						<motion.div
-							layout
-							transition={{ type: 'spring', duration: 1, bounce: 0.1 }}
-							className={cn(
-								'm-auto aspect-[33/16] bg-current mask-cover mask-[url(/logo.svg)]',
-								introAnimationComplete ? 'h-8 sm:h-10 md:h-12' : 'h-32',
-							)}
-						/>
-					) : (
+					<motion.div
+						layout
+						transition={{ type: 'spring', duration: 1, bounce: 0.1 }}
+						className="m-auto"
+					>
 						<svg
 							viewBox="0 0 264 128"
 							fill="none"
 							id="logo"
 							className={cn(
 								'm-auto aspect-[33/16] fill-current',
-								showStatic ? 'h-8 sm:h-10 md:h-12' : 'h-32',
+								introAnimationComplete ? 'h-8 sm:h-10' : 'h-24 sm:h-32',
 							)}
 							xmlns="http://www.w3.org/2000/svg"
 						>
@@ -266,25 +258,34 @@ export function Header() {
 								</clipPath>
 							</defs>
 						</svg>
-					)}
+					</motion.div>
 				</div>
+
 				<nav className="hidden flex-1 justify-end gap-6 md:flex">
 					<ul className="contents">
 						<NavLink index={0} href="/">
 							Home
 						</NavLink>
-						<NavLink index={1} href="/blog">
+						<NavLink index={1} href="https://survivingstorms.com/map">
+							Map
+						</NavLink>
+						<NavLink index={2} href="https://survivingstorms.com/blog">
 							Blog
 						</NavLink>
-						<NavLink index={2} href="/works">
+						<NavLink index={3} href="https://survivingstorms.com/works">
 							Works & Offerings
 						</NavLink>
-						<NavLink index={3} href="/about">
+						<NavLink index={4} href="https://survivingstorms.com/about">
 							About
 						</NavLink>
-						<NavLink index={4} href="/contact">
+						<NavLink index={5} href="https://survivingstorms.com/contact">
 							Contact
 						</NavLink>
+						<motion.li>
+							<Link href="https://survivingstorms.com/">
+								<Icon name="search" className="w-6" />
+							</Link>
+						</motion.li>
 					</ul>
 				</nav>
 			</div>
