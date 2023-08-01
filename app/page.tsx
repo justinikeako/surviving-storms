@@ -36,7 +36,7 @@ function ChristmasGhostCard({
 					height="70"
 					viewBox="0 0 51 70"
 					className={cn(
-						'mask-cover mask-center mask-[url(/painted-mask-small.png)]',
+						'mask-cover mask-center mask-[url(/painted-mask-small.webp)]',
 						className,
 					)}
 					xmlns="http://www.w3.org/2000/svg"
@@ -63,7 +63,7 @@ function QuickLink({
 				<Link
 					{...props}
 					className={cn(
-						'bg-gray flex h-16 w-64 shrink-0 items-center justify-center px-8 font-display text-xl uppercase text-gray-50 transition-colors mask-contain mask-luminance mask-center mask-no-repeat mask-[url(/brush-mask.png)] active:transition-none',
+						'bg-gray flex h-16 w-64 shrink-0 items-center justify-center px-8 font-display text-xl uppercase text-gray-50 transition-colors mask-contain mask-luminance mask-center mask-no-repeat mask-[url(/brush-mask.webp)] active:transition-none',
 						props.className,
 					)}
 				/>
@@ -392,7 +392,7 @@ export default function Home() {
 					<div className="absolute inset-x-0 -z-10 h-96 bg-gray-950">
 						<div className="absolute h-full w-full bg-[url(/map.svg)] bg-contain bg-fixed bg-center bg-no-repeat md:bg-cover" />
 
-						<div className="absolute h-full w-full bg-gray-900 mask-cover mask-center mask-[url(/painted-mask.png)]"></div>
+						<div className="absolute h-full w-full bg-gray-900 mask-cover mask-center mask-[url(/painted-mask.webp)]"></div>
 					</div>
 
 					<div className="m-auto">
@@ -633,7 +633,7 @@ export default function Home() {
 
 						<div className="absolute h-full w-full from-black mask-gradient-to-t">
 							<div className="absolute bottom-0 h-[200%] w-full from-transparent to-black radial-farthest-side gradient-top mask-radial-gradient">
-								<div className="h-full bg-gray-900 mask-cover mask-luminance mask-center mask-[url(/painted-mask.png)]"></div>
+								<div className="h-full bg-gray-900 mask-cover mask-luminance mask-center mask-[url(/painted-mask.webp)]"></div>
 							</div>
 						</div>
 					</div>

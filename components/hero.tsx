@@ -49,7 +49,7 @@ export function Hero() {
 
 				<div className="absolute inset-x-0 bottom-0 h-64 from-black mask-gradient-to-t">
 					<div className="h-full from-transparent to-black radial-farthest-side gradient-top mask-radial-gradient">
-						<div className="h-full bg-gray-100 mask-cover mask-luminance mask-center mask-[url(/painted-mask.png)]"></div>
+						<div className="h-full bg-gray-100 mask-cover mask-luminance mask-center mask-[url(/painted-mask.webp)]"></div>
 					</div>
 				</div>
 			</div>
