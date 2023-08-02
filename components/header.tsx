@@ -232,7 +232,7 @@ export function Header() {
 								initial={{ opacity: 1 }}
 								exit={{ opacity: 0 }}
 								transition={{ duration: 1 }}
-								className="absolute inset-x-0 top-0 flex h-[100dvh] flex-col items-center justify-between bg-gray-900 py-4 md:py-8"
+								className="absolute inset-x-0 top-0 flex h-[100dvh] flex-col items-center justify-between bg-gray-900 py-8"
 							>
 								<OrchestratedReveal
 									fadeOnly

@@ -639,22 +639,35 @@ export default function Home() {
 					</div>
 
 					<div className="shrink-0 grow">
-						<Image src={logo} alt="Caribbean Cyclone Cartography" />
+						<Image
+							src={logo}
+							alt="Caribbean Cyclone Cartography"
+							className="h-12 w-auto object-left opacity-50"
+						/>
 					</div>
 
 					<p>&copy; Not Primitive 2023</p>
 
 					<ul className="flex shrink-0 grow justify-center gap-4 md:justify-end">
 						<li className="contents">
-							<Image src={goldsmiths} alt="Goldsmiths" />
+							<Image
+								src={goldsmiths}
+								alt="Goldsmiths"
+								className="h-5 w-auto opacity-50 lg:h-24"
+							/>
 						</li>
 						<li className="contents">
-							<Image src={gcrf} alt="Goldsmiths" />
+							<Image
+								src={gcrf}
+								alt="Goldsmiths"
+								className="h-5 w-auto opacity-50 lg:h-24"
+							/>
 						</li>
 						<li className="contents">
 							<Image
 								src={monaGeoinformaticsInstitute}
 								alt="Mona Geoinformatics Institute (MGI)"
+								className="h-5 w-auto opacity-50 lg:h-24"
 							/>
 						</li>
 					</ul>
