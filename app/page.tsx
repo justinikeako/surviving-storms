@@ -233,8 +233,8 @@ export default function Home() {
 				<Hero />
 
 				{/* First Section */}
-				<ViewportRevealContainer asChild>
-					<section className="relative space-y-16 py-16">
+				<section className="relative space-y-16 py-16">
+					<ViewportRevealContainer asChild>
 						<div className="mx-auto flex w-fit flex-col gap-12 py-8 sm:mr-0 sm:gap-8 md:flex-row md:items-center lg:w-full lg:justify-center lg:gap-16 2xl:justify-around">
 							<ContainerOrchestratedReveal
 								fadeOnly
@@ -281,39 +281,41 @@ export default function Home() {
 								/>
 							</ul>
 						</div>
+					</ViewportRevealContainer>
 
+					<ViewportRevealContainer asChild>
 						<ul className="flex flex-wrap justify-around gap-8">
 							<QuickLink
 								href="https://survivingstorms.com/workshops"
 								className="bg-lime-700 hover:bg-lime-600 active:bg-lime-800"
-								delay={0.8}
+								delay={0}
 							>
 								Workshops
 							</QuickLink>
 							<QuickLink
 								href="https://survivingstorms.com/publications"
 								className="bg-gray-800 hover:bg-gray-700 active:bg-gray-900"
-								delay={0.9}
+								delay={0.1}
 							>
 								Publications
 							</QuickLink>
 							<QuickLink
 								href="https://survivingstorms.com/interventions"
 								className="bg-red-600 hover:bg-red-500 active:bg-red-700"
-								delay={1}
+								delay={0.2}
 							>
 								Interventions
 							</QuickLink>
 							<QuickLink
 								href="https://survivingstorms.com/podcasts"
 								className="bg-yellow-600 hover:bg-yellow-500 active:bg-yellow-700"
-								delay={1.1}
+								delay={0.3}
 							>
 								Podcasts
 							</QuickLink>
 						</ul>
-					</section>
-				</ViewportRevealContainer>
+					</ViewportRevealContainer>
+				</section>
 
 				{/* Blog */}
 				<section className="relative -mx-8 space-y-12 px-8 py-16 md:-mx-16 md:px-16">
@@ -385,30 +387,32 @@ export default function Home() {
 				</section>
 
 				{/* Map */}
-				<section
-					data-header-dark
-					className="relative -mx-8 flex h-96 text-center text-gray-50 md:-mx-16"
-				>
-					<div className="absolute inset-x-0 -z-10 h-96 bg-gray-950">
-						<div className="absolute h-full w-full bg-[url(/map.svg)] bg-contain bg-fixed bg-center bg-no-repeat md:bg-cover" />
+				<ViewportReveal>
+					<section
+						data-header-dark
+						className="relative -mx-8 flex h-96 text-center text-gray-50 md:-mx-16"
+					>
+						<div className="absolute inset-x-0 -z-10 h-96 bg-gray-950">
+							<div className="absolute h-full w-full bg-[url(/map.svg)] bg-contain bg-fixed bg-center bg-no-repeat md:bg-cover" />
 
-						<div className="absolute h-full w-full bg-gray-900 mask-cover mask-center mask-[url(/painted-mask.webp)]"></div>
-					</div>
+							<div className="absolute h-full w-full bg-gray-900 mask-cover mask-center mask-[url(/painted-mask.webp)]"></div>
+						</div>
 
-					<div className="m-auto">
-						<h2 className="font-display text-3xl uppercase xs:text-4xl md:text-5xl lg:text-6xl 2xl:text-7xl">
-							<Link
-								href="https://survivingstorms.com/map/"
-								className="before:absolute before:inset-0 before:block"
-							>
-								Explore The Map
-							</Link>
-						</h2>
-						<p className="text-gray-400">
-							Experience the stories // Meet the communities
-						</p>
-					</div>
-				</section>
+						<div className="m-auto">
+							<h2 className="font-display text-3xl uppercase xs:text-4xl md:text-5xl lg:text-6xl 2xl:text-7xl">
+								<Link
+									href="https://survivingstorms.com/map/"
+									className="before:absolute before:inset-0 before:block"
+								>
+									Explore The Map
+								</Link>
+							</h2>
+							<p className="text-gray-400">
+								Experience the stories // Meet the communities
+							</p>
+						</div>
+					</section>
+				</ViewportReveal>
 
 				{/* Works */}
 				<section className="space-y-12 py-16">
@@ -642,7 +646,7 @@ export default function Home() {
 						<Image
 							src={logo}
 							alt="Caribbean Cyclone Cartography"
-							className="h-12 w-auto object-left opacity-50"
+							className="h-12 w-auto object-left"
 						/>
 					</div>
 
@@ -653,21 +657,21 @@ export default function Home() {
 							<Image
 								src={goldsmiths}
 								alt="Goldsmiths"
-								className="h-5 w-auto opacity-50 lg:h-6"
+								className="h-5 w-auto lg:h-6"
 							/>
 						</li>
 						<li className="contents">
 							<Image
 								src={gcrf}
 								alt="Goldsmiths"
-								className="h-5 w-auto opacity-50 lg:h-6"
+								className="h-5 w-auto lg:h-6"
 							/>
 						</li>
 						<li className="contents">
 							<Image
 								src={monaGeoinformaticsInstitute}
 								alt="Mona Geoinformatics Institute (MGI)"
-								className="h-5 w-auto opacity-50 lg:h-6"
+								className="h-5 w-auto lg:h-6"
 							/>
 						</li>
 					</ul>
