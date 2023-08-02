@@ -234,11 +234,7 @@ export function Header() {
 								transition={{ duration: 1 }}
 								className="absolute inset-x-0 top-0 flex h-[100dvh] flex-col items-center justify-between bg-gray-900 py-8"
 							>
-								<OrchestratedReveal
-									fadeOnly
-									condition={logoAnimationComplete}
-									delay={0.1}
-								>
+								<OrchestratedReveal fadeOnly condition={logoAnimationComplete}>
 									<Image
 										src={logo}
 										alt="Caribbean Cyclone Cartography"
@@ -251,7 +247,7 @@ export function Header() {
 										<OrchestratedReveal
 											asChild
 											condition={logoAnimationComplete}
-											delay={0.3}
+											delay={0.1}
 											fadeOnly
 										>
 											<Image
@@ -265,7 +261,7 @@ export function Header() {
 										<OrchestratedReveal
 											asChild
 											condition={logoAnimationComplete}
-											delay={0.4}
+											delay={0.2}
 											fadeOnly
 										>
 											<Image
@@ -279,7 +275,7 @@ export function Header() {
 										<OrchestratedReveal
 											asChild
 											condition={logoAnimationComplete}
-											delay={0.5}
+											delay={0.3}
 											fadeOnly
 										>
 											<Image
