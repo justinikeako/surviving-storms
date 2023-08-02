@@ -57,13 +57,14 @@ export function ViewportReveal({
 type OrchestratedRevealProps = MotionSlotProps<{
 	asChild?: boolean;
 	fadeOnly?: boolean;
+	condition?: boolean;
 	delay?: number;
 }>;
 
 export const OrchestratedReveal = forwardRef<
 	React.ElementRef<'div'>,
 	OrchestratedRevealProps
->(({ delay = 0, asChild, fadeOnly, ...props }, ref) => {
+>(({ asChild, delay = 0, condition = true, fadeOnly, ...props }, ref) => {
 	const Comp = asChild ? MotionSlot : motion.div;
 	const shouldReduceMotion = useReducedMotion() || fadeOnly;
 
@@ -72,7 +73,7 @@ export const OrchestratedReveal = forwardRef<
 			{...props}
 			ref={ref}
 			initial={{ y: shouldReduceMotion ? 0 : 48, opacity: 0 }}
-			animate={{ y: 0, opacity: 1 }}
+			animate={condition && { y: 0, opacity: 1 }}
 			transition={{ ...transition, delay }}
 		>
 			{props.children}

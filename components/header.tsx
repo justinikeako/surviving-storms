@@ -8,6 +8,12 @@ import { cn } from '~/lib/utils';
 import { pauseDuration, pauseDurationMs } from '~/constants';
 import { Icon } from './icon';
 import * as Dialog from '@radix-ui/react-dialog';
+import Image from 'next/image';
+import logo from '../public/logo.png';
+import goldsmiths from '../public/goldsmiths.png';
+import gcrf from '../public/gcrf.png';
+import monaGeoinformaticsInstitute from '../public/mona-geoinformatics-institute.png';
+import { OrchestratedReveal } from './reveal';
 
 const content: Variants = {
 	hide: {
@@ -162,6 +168,7 @@ export function Header() {
 
 	const [fullscreenMenuOpen, setFullscreenMenuOpen] = useState(false);
 	const [introAnimationComplete, setIntroAnimationComplete] = useState(false);
+	const [logoAnimationComplete, setLogoAnimationComplete] = useState(false);
 
 	const headerRef = useRef<HTMLDivElement>(null);
 
@@ -225,8 +232,65 @@ export function Header() {
 								initial={{ opacity: 1 }}
 								exit={{ opacity: 0 }}
 								transition={{ duration: 1 }}
-								className="absolute inset-x-0 top-0 flex h-screen items-center justify-center bg-gray-900"
-							/>
+								className="absolute inset-x-0 top-0 flex h-screen items-center justify-between bg-gray-900 py-4 md:py-8"
+							>
+								<OrchestratedReveal
+									asChild
+									condition={logoAnimationComplete}
+									delay={0.25}
+								>
+									<Image
+										src={logo}
+										alt="Caribbean Cyclone Cartography"
+										className="h-8 object-contain opacity-50 lg:h-10"
+									/>
+								</OrchestratedReveal>
+
+								<ul className="flex flex-wrap justify-center gap-4 opacity-50">
+									<OrchestratedReveal
+										asChild
+										condition={logoAnimationComplete}
+										delay={0.35}
+										fadeOnly
+									>
+										<li className="contents">
+											<Image
+												src={goldsmiths}
+												alt="Goldsmiths"
+												className="h-6 object-contain lg:h-auto"
+											/>
+										</li>
+									</OrchestratedReveal>
+									<OrchestratedReveal
+										asChild
+										condition={logoAnimationComplete}
+										delay={0.45}
+										fadeOnly
+									>
+										<li className="contents">
+											<Image
+												src={gcrf}
+												alt="Goldsmiths"
+												className="h-6 object-contain lg:h-auto"
+											/>
+										</li>
+									</OrchestratedReveal>
+									<OrchestratedReveal
+										asChild
+										condition={logoAnimationComplete}
+										delay={0.55}
+										fadeOnly
+									>
+										<li className="contents">
+											<Image
+												src={monaGeoinformaticsInstitute}
+												alt="Mona Geoinformatics Institute (MGI)"
+												className="h-6 object-contain lg:h-auto"
+											/>
+										</li>
+									</OrchestratedReveal>
+								</ul>
+							</motion.div>
 						)}
 					</AnimatePresence>
 
@@ -316,6 +380,7 @@ export function Header() {
 									<Letter
 										delay={14 * letterStagger}
 										d="M179.955 124.245C177.624 121.667 176.464 117.979 176.464 113.144V109.752H185.308V113.835C185.308 117.691 186.923 119.619 190.155 119.619C190.822 119.665 191.491 119.563 192.113 119.32C192.736 119.077 193.297 118.699 193.756 118.213C194.696 116.892 195.134 115.278 194.99 113.662C195.035 111.354 194.451 109.077 193.3 107.076C191.553 104.5 189.433 102.197 187.01 100.243C183.83 97.6312 181.1 94.5144 178.931 91.0174C177.375 88.1637 176.584 84.9555 176.637 81.7054C176.637 77.0021 177.825 73.3637 180.201 70.79C182.578 68.2164 186.035 66.9254 190.574 66.9172C195.051 66.9172 198.443 68.1506 200.725 70.79C203.007 73.4294 204.178 77.0679 204.178 81.8904V84.3571H195.335V81.286C195.458 79.6993 195.022 78.1196 194.102 76.8212C193.666 76.3388 193.127 75.9616 192.524 75.7181C191.922 75.4745 191.272 75.3709 190.624 75.4152C187.499 75.4152 185.941 77.3146 185.949 81.1134C185.942 83.2484 186.545 85.341 187.688 87.1446C189.468 89.7028 191.603 91.9952 194.028 93.9528C197.242 96.54 199.973 99.676 202.094 103.215C203.628 106.238 204.386 109.595 204.302 112.984C204.302 117.852 203.097 121.593 200.688 124.208C198.283 126.81 194.792 128.117 190.192 128.117C185.591 128.117 182.335 126.822 179.955 124.245Z"
+										onAnimationComplete={() => setLogoAnimationComplete(true)}
 									/>
 								</g>
 
