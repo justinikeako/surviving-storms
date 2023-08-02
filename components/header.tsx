@@ -236,8 +236,9 @@ export function Header() {
 							>
 								<OrchestratedReveal
 									asChild
+									fadeOnly
 									condition={logoAnimationComplete}
-									delay={0.25}
+									delay={0.1}
 								>
 									<Image
 										src={logo}
@@ -251,7 +252,7 @@ export function Header() {
 										<OrchestratedReveal
 											asChild
 											condition={logoAnimationComplete}
-											delay={0.35}
+											delay={0.3}
 											fadeOnly
 										>
 											<Image
@@ -265,7 +266,7 @@ export function Header() {
 										<OrchestratedReveal
 											asChild
 											condition={logoAnimationComplete}
-											delay={0.45}
+											delay={0.4}
 											fadeOnly
 										>
 											<Image
@@ -279,7 +280,7 @@ export function Header() {
 										<OrchestratedReveal
 											asChild
 											condition={logoAnimationComplete}
-											delay={0.55}
+											delay={0.5}
 											fadeOnly
 										>
 											<Image
