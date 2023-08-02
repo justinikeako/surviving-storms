@@ -232,7 +232,7 @@ export function Header() {
 								initial={{ opacity: 1 }}
 								exit={{ opacity: 0 }}
 								transition={{ duration: 1 }}
-								className="absolute inset-x-0 top-0 flex h-screen items-center justify-between bg-gray-900 py-4 md:py-8"
+								className="absolute inset-x-0 top-0 flex h-screen flex-col items-center justify-between bg-gray-900 py-4 md:py-8"
 							>
 								<OrchestratedReveal
 									asChild
@@ -247,48 +247,48 @@ export function Header() {
 								</OrchestratedReveal>
 
 								<ul className="flex flex-wrap justify-center gap-4 opacity-50">
-									<OrchestratedReveal
-										asChild
-										condition={logoAnimationComplete}
-										delay={0.35}
-										fadeOnly
-									>
-										<li className="contents">
+									<li className="contents">
+										<OrchestratedReveal
+											asChild
+											condition={logoAnimationComplete}
+											delay={0.35}
+											fadeOnly
+										>
 											<Image
 												src={goldsmiths}
 												alt="Goldsmiths"
 												className="h-6 object-contain lg:h-auto"
 											/>
-										</li>
-									</OrchestratedReveal>
-									<OrchestratedReveal
-										asChild
-										condition={logoAnimationComplete}
-										delay={0.45}
-										fadeOnly
-									>
-										<li className="contents">
+										</OrchestratedReveal>
+									</li>
+									<li className="contents">
+										<OrchestratedReveal
+											asChild
+											condition={logoAnimationComplete}
+											delay={0.45}
+											fadeOnly
+										>
 											<Image
 												src={gcrf}
 												alt="Goldsmiths"
 												className="h-6 object-contain lg:h-auto"
 											/>
-										</li>
-									</OrchestratedReveal>
-									<OrchestratedReveal
-										asChild
-										condition={logoAnimationComplete}
-										delay={0.55}
-										fadeOnly
-									>
-										<li className="contents">
+										</OrchestratedReveal>
+									</li>
+									<li className="contents">
+										<OrchestratedReveal
+											asChild
+											condition={logoAnimationComplete}
+											delay={0.55}
+											fadeOnly
+										>
 											<Image
 												src={monaGeoinformaticsInstitute}
 												alt="Mona Geoinformatics Institute (MGI)"
 												className="h-6 object-contain lg:h-auto"
 											/>
-										</li>
-									</OrchestratedReveal>
+										</OrchestratedReveal>
+									</li>
 								</ul>
 							</motion.div>
 						)}
