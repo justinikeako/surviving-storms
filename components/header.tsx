@@ -232,18 +232,17 @@ export function Header() {
 								initial={{ opacity: 1 }}
 								exit={{ opacity: 0 }}
 								transition={{ duration: 1 }}
-								className="absolute inset-x-0 top-0 flex h-screen flex-col items-center justify-between bg-gray-900 py-4 md:py-8"
+								className="absolute inset-x-0 top-0 flex h-[100dvh] flex-col items-center justify-between bg-gray-900 py-4 md:py-8"
 							>
 								<OrchestratedReveal
 									fadeOnly
 									condition={logoAnimationComplete}
 									delay={0.1}
-									className="opacity-50"
 								>
 									<Image
 										src={logo}
 										alt="Caribbean Cyclone Cartography"
-										className="h-8 object-contain lg:h-10"
+										className="h-8 object-contain opacity-50 lg:h-10"
 									/>
 								</OrchestratedReveal>
 
