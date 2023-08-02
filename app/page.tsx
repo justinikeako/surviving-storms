@@ -653,21 +653,21 @@ export default function Home() {
 							<Image
 								src={goldsmiths}
 								alt="Goldsmiths"
-								className="h-5 w-auto opacity-50 lg:h-24"
+								className="h-5 w-auto opacity-50 lg:h-6"
 							/>
 						</li>
 						<li className="contents">
 							<Image
 								src={gcrf}
 								alt="Goldsmiths"
-								className="h-5 w-auto opacity-50 lg:h-24"
+								className="h-5 w-auto opacity-50 lg:h-6"
 							/>
 						</li>
 						<li className="contents">
 							<Image
 								src={monaGeoinformaticsInstitute}
 								alt="Mona Geoinformatics Institute (MGI)"
-								className="h-5 w-auto opacity-50 lg:h-24"
+								className="h-5 w-auto opacity-50 lg:h-6"
 							/>
 						</li>
 					</ul>
