@@ -3,25 +3,25 @@
 @tailwind utilities;
 
 @layer base {
-	:root {
-		--tw-bg-radial-gradient-shape: ;
-		--tw-bg-radial-gradient-size: farthest-corner;
-		--tw-bg-radial-gradient-position: center;
+  :root {
+    --tw-bg-radial-gradient-shape: ;
+    --tw-bg-radial-gradient-size: farthest-corner;
+    --tw-bg-radial-gradient-position: center;
 
-		--tw-bg-radial-gradient-shape-and-size: var(--tw-bg-radial-gradient-shape)
-			var(--tw-bg-radial-gradient-size) at var(--tw-bg-radial-gradient-position);
-	}
+    --tw-bg-radial-gradient-shape-and-size: var(--tw-bg-radial-gradient-shape)
+      var(--tw-bg-radial-gradient-size) at var(--tw-bg-radial-gradient-position);
+  }
 
-	body {
-		font-size: 14px;
-		scroll-behavior: smooth;
-		overflow-x: hidden;
-	}
+  body {
+    font-size: 14px;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
 }
 
 @layer utilities {
-	.no-scrollbar::-webkit-scrollbar {
-		display: none;
-		-webkit-appearance: none;
-	}
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+    -webkit-appearance: none;
+  }
 }

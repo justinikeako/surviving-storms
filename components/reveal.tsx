@@ -1,141 +1,141 @@
-'use client';
+"use client";
 
-import { motion, useInView, Transition, useReducedMotion } from 'framer-motion';
-import { Slot, SlotProps } from '@radix-ui/react-slot';
-import { createContext, forwardRef, useContext, useRef } from 'react';
+import { motion, useInView, Transition, useReducedMotion } from "framer-motion";
+import { Slot, SlotProps } from "@radix-ui/react-slot";
+import { createContext, forwardRef, useContext, useRef } from "react";
 
 const MotionSlot = motion(
-	Slot as React.ForwardRefExoticComponent<
-		Omit<SlotProps, 'style'> & React.RefAttributes<HTMLElement>
-	>,
+  Slot as React.ForwardRefExoticComponent<
+    Omit<SlotProps, "style"> & React.RefAttributes<HTMLElement>
+  >,
 );
 
 type MotionSlotProps<ExtendProps> = React.ComponentPropsWithoutRef<
-	typeof MotionSlot
+  typeof MotionSlot
 > &
-	ExtendProps;
+  ExtendProps;
 
 const transition: Transition = {
-	type: 'spring',
-	duration: 1,
-	bounce: 0,
+  type: "spring",
+  duration: 1,
+  bounce: 0,
 };
 
 type ViewportRevealProps = MotionSlotProps<{
-	asChild?: boolean;
-	fadeOnly?: boolean;
+  asChild?: boolean;
+  fadeOnly?: boolean;
 }>;
 
 export function ViewportReveal({
-	asChild,
-	fadeOnly,
-	...props
+  asChild,
+  fadeOnly,
+  ...props
 }: ViewportRevealProps) {
-	const Comp = asChild ? MotionSlot : motion.div;
+  const Comp = asChild ? MotionSlot : motion.div;
 
-	const shouldReduceMotion = useReducedMotion() || fadeOnly;
-	const elementRef = useRef<HTMLDivElement>(null);
-	const elementIsInView = useInView(elementRef, {
-		once: true,
-		margin: '0px 160px -160px 0px',
-	});
+  const shouldReduceMotion = useReducedMotion() || fadeOnly;
+  const elementRef = useRef<HTMLDivElement>(null);
+  const elementIsInView = useInView(elementRef, {
+    once: true,
+    margin: "0px 160px -160px 0px",
+  });
 
-	return (
-		<Comp
-			{...props}
-			ref={elementRef}
-			initial={{
-				y: shouldReduceMotion ? 1 : 10,
-				opacity: 0,
-			}}
-			animate={elementIsInView && { y: 0, opacity: 1 }}
-			transition={transition}
-		/>
-	);
+  return (
+    <Comp
+      {...props}
+      ref={elementRef}
+      initial={{
+        y: shouldReduceMotion ? 1 : 10,
+        opacity: 0,
+      }}
+      animate={elementIsInView && { y: 0, opacity: 1 }}
+      transition={transition}
+    />
+  );
 }
 
 type OrchestratedRevealProps = MotionSlotProps<{
-	asChild?: boolean;
-	fadeOnly?: boolean;
-	condition?: boolean;
-	delay?: number;
+  asChild?: boolean;
+  fadeOnly?: boolean;
+  condition?: boolean;
+  delay?: number;
 }>;
 
 export const OrchestratedReveal = forwardRef<
-	React.ElementRef<'div'>,
-	OrchestratedRevealProps
+  React.ElementRef<"div">,
+  OrchestratedRevealProps
 >(({ asChild, delay = 0, condition = true, fadeOnly, ...props }, ref) => {
-	const Comp = asChild ? MotionSlot : motion.div;
-	const shouldReduceMotion = useReducedMotion() || fadeOnly;
+  const Comp = asChild ? MotionSlot : motion.div;
+  const shouldReduceMotion = useReducedMotion() || fadeOnly;
 
-	return (
-		<Comp
-			{...props}
-			ref={ref}
-			initial={{ y: shouldReduceMotion ? 0 : 48, opacity: 0 }}
-			animate={condition && { y: 0, opacity: 1 }}
-			transition={{ ...transition, delay }}
-		>
-			{props.children}
-		</Comp>
-	);
+  return (
+    <Comp
+      {...props}
+      ref={ref}
+      initial={{ y: shouldReduceMotion ? 0 : 48, opacity: 0 }}
+      animate={condition && { y: 0, opacity: 1 }}
+      transition={{ ...transition, delay }}
+    >
+      {props.children}
+    </Comp>
+  );
 });
 
-OrchestratedReveal.displayName = 'OrchestratedReveal';
+OrchestratedReveal.displayName = "OrchestratedReveal";
 
 type ViewportRevealContainerProps = SlotProps & {
-	asChild?: boolean;
+  asChild?: boolean;
 };
 
 const ViewportRevealContainerContext = createContext(false);
 
 export function useContainerInView() {
-	return useContext(ViewportRevealContainerContext);
+  return useContext(ViewportRevealContainerContext);
 }
 
 export function ViewportRevealContainer({
-	asChild,
-	...props
+  asChild,
+  ...props
 }: ViewportRevealContainerProps) {
-	const Comp = asChild ? Slot : 'div';
+  const Comp = asChild ? Slot : "div";
 
-	const containerRef = useRef<HTMLDivElement>(null);
-	const containerIsInView = useInView(containerRef, {
-		once: true,
-		margin: '0px 320px -320px 0px',
-	});
+  const containerRef = useRef<HTMLDivElement>(null);
+  const containerIsInView = useInView(containerRef, {
+    once: true,
+    margin: "0px 320px -320px 0px",
+  });
 
-	return (
-		<ViewportRevealContainerContext.Provider value={containerIsInView}>
-			<Comp {...props} ref={containerRef} />
-		</ViewportRevealContainerContext.Provider>
-	);
+  return (
+    <ViewportRevealContainerContext.Provider value={containerIsInView}>
+      <Comp {...props} ref={containerRef} />
+    </ViewportRevealContainerContext.Provider>
+  );
 }
 
 export const ContainerOrchestratedReveal = forwardRef<
-	React.ElementRef<'div'>,
-	OrchestratedRevealProps
+  React.ElementRef<"div">,
+  OrchestratedRevealProps
 >(({ delay = 0, asChild, fadeOnly, ...props }, ref) => {
-	const Comp = asChild ? MotionSlot : motion.div;
-	const shouldReduceMotion = useReducedMotion() || fadeOnly;
-	const containerInView = useContainerInView();
+  const Comp = asChild ? MotionSlot : motion.div;
+  const shouldReduceMotion = useReducedMotion() || fadeOnly;
+  const containerInView = useContainerInView();
 
-	return (
-		<Comp
-			{...props}
-			ref={ref}
-			initial={{ y: shouldReduceMotion ? 0 : 48, opacity: 0 }}
-			animate={
-				containerInView && {
-					y: 0,
-					opacity: 1,
-					transition: { ...transition, delay },
-				}
-			}
-		>
-			{props.children}
-		</Comp>
-	);
+  return (
+    <Comp
+      {...props}
+      ref={ref}
+      initial={{ y: shouldReduceMotion ? 0 : 48, opacity: 0 }}
+      animate={
+        containerInView && {
+          y: 0,
+          opacity: 1,
+          transition: { ...transition, delay },
+        }
+      }
+    >
+      {props.children}
+    </Comp>
+  );
 });
 
-ContainerOrchestratedReveal.displayName = 'ContainerOrchestratedReveal';
+ContainerOrchestratedReveal.displayName = "ContainerOrchestratedReveal";
