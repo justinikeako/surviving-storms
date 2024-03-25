@@ -206,7 +206,7 @@ export default function Home() {
         </ViewportReveal>
 
         {/* Works */}
-        <section className="space-y-12 py-16 2xl:container">
+        <section className="space-y-12 px-8 py-16 2xl:container md:px-16">
           <ViewportReveal asChild>
             <h2 className="text-center font-display text-xl uppercase md:text-2xl">
               Latest Works & Offerings
@@ -299,7 +299,7 @@ export default function Home() {
         </ViewportReveal>
 
         {/* Social Media */}
-        <section className="space-y-12 py-16">
+        <section className="space-y-12 px-8 py-16 2xl:container md:px-16">
           <ViewportReveal asChild>
             <h2 className="text-center font-display text-xl uppercase md:text-2xl">
               Our Social Media
@@ -422,50 +422,61 @@ export default function Home() {
           </Link>
         </section>
 
-        <footer className="relative -mx-8 mt-16 flex flex-wrap items-end justify-between gap-4 px-8 py-8 text-gray-50 md:-mx-16">
-          <div className="absolute inset-x-0 bottom-0 -z-10 h-[150%]">
-            <div className="gradient-top absolute bottom-0 h-full w-full from-transparent to-gray-950 radial-farthest-side bg-radial-gradient mask-gradient-to-b"></div>
+        <footer className="relative mt-16 text-gray-50">
+          <div className="flex flex-wrap items-end justify-between gap-4 px-8 py-8 2xl:container">
+            <div className="absolute inset-x-0 bottom-0 -z-10 h-[150%]">
+              <div className="absolute bottom-0 h-full w-full from-transparent to-gray-950 radial-farthest-side bg-radial-gradient-t mask-gradient-to-t"></div>
 
-            <div className="absolute h-full w-full from-black mask-gradient-to-t">
-              <div className="gradient-top absolute bottom-0 h-[200%] w-full from-transparent to-black radial-farthest-side mask-radial-gradient">
-                <div className="h-full bg-gray-900 mask-cover mask-luminance mask-center mask-[url(/painted-mask.webp)]"></div>
+              <div className="absolute h-full w-full mask-gradient-to-t">
+                <div className="absolute bottom-0 h-[200%] w-full radial-farthest-side mask-radial-gradient-t mask-from-0 mask-to-100">
+                  <div className="h-full bg-gray-900 mask-cover mask-luminance mask-center mask-[url(/painted-mask.webp)]"></div>
+                </div>
               </div>
             </div>
+
+            <div className="shrink-0 grow">
+              <Image
+                src={logo}
+                alt="Caribbean Cyclone Cartography"
+                className="h-12 w-auto object-left"
+              />
+            </div>
+
+            <p>
+              &copy;{" "}
+              <Link
+                href="https://www.notprimitive.com/"
+                className="hover:underline"
+              >
+                Not Primitive
+              </Link>{" "}
+              2024
+            </p>
+
+            <ul className="flex shrink-0 grow justify-center gap-4 md:justify-end">
+              <li className="contents">
+                <Image
+                  src={goldsmiths}
+                  alt="Goldsmiths"
+                  className="h-5 w-auto lg:h-6"
+                />
+              </li>
+              <li className="contents">
+                <Image
+                  src={gcrf}
+                  alt="Goldsmiths"
+                  className="h-5 w-auto lg:h-6"
+                />
+              </li>
+              <li className="contents">
+                <Image
+                  src={monaGeoinformaticsInstitute}
+                  alt="Mona Geoinformatics Institute (MGI)"
+                  className="h-5 w-auto lg:h-6"
+                />
+              </li>
+            </ul>
           </div>
-
-          <div className="shrink-0 grow">
-            <Image
-              src={logo}
-              alt="Caribbean Cyclone Cartography"
-              className="h-12 w-auto object-left"
-            />
-          </div>
-
-          <p>&copy; Not Primitive 2023</p>
-
-          <ul className="flex shrink-0 grow justify-center gap-4 md:justify-end">
-            <li className="contents">
-              <Image
-                src={goldsmiths}
-                alt="Goldsmiths"
-                className="h-5 w-auto lg:h-6"
-              />
-            </li>
-            <li className="contents">
-              <Image
-                src={gcrf}
-                alt="Goldsmiths"
-                className="h-5 w-auto lg:h-6"
-              />
-            </li>
-            <li className="contents">
-              <Image
-                src={monaGeoinformaticsInstitute}
-                alt="Mona Geoinformatics Institute (MGI)"
-                className="h-5 w-auto lg:h-6"
-              />
-            </li>
-          </ul>
         </footer>
       </main>
     </>

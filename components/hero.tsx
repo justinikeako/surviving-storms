@@ -43,12 +43,12 @@ export function Hero() {
           />
         </motion.div>
 
-        <div className="gradient-bottom-left absolute inset-0 block from-gray-900 bg-radial-gradient" />
+        <div className="absolute inset-0 block from-gray-900 bg-radial-gradient-bl" />
 
         <div className="absolute inset-x-0 bottom-0 h-16	bg-gradient-to-t from-gray-100"></div>
 
-        <div className="absolute inset-x-0 bottom-0 h-64 from-black mask-gradient-to-t">
-          <div className="gradient-top h-full from-transparent to-black radial-farthest-side mask-radial-gradient">
+        <div className="absolute inset-x-0 bottom-0 h-64 mask-gradient-to-t">
+          <div className="h-full from-transparent radial-farthest-side mask-radial-gradient-t mask-from-0 mask-to-100">
             <div className="h-full bg-gray-100 mask-cover mask-luminance mask-center mask-[url(/painted-mask.webp)]"></div>
           </div>
         </div>

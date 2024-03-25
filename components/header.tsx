@@ -173,7 +173,7 @@ export function Header() {
   const headerRef = useRef<HTMLDivElement>(null);
 
   const { scrollY } = useScroll();
-  const [isDark, setIsDark] = useState(["/"].includes(pathname));
+  const [isDark, setIsDark] = useState(pathname === "/");
 
   useEffect(() => {
     const headerElement = headerRef.current;
@@ -223,7 +223,7 @@ export function Header() {
         data-dark={isDark || undefined}
         className="group fixed inset-x-0 z-20 data-[dark]:text-gray-50"
       >
-        <div className="absolute inset-0 -z-10 block bg-gray-100 from-black transition-colors mask-gradient-to-b group-data-[dark]:bg-gray-900/75" />
+        <div className="absolute inset-0 -z-10 block bg-gray-100 transition-colors mask-gradient-to-b group-data-[dark]:bg-gray-900/75" />
 
         <div className="flex h-20 items-center px-8 2xl:container md:px-16">
           <AnimatePresence>
