@@ -17,12 +17,16 @@ export const HorizontalScroller = forwardRef<
     <Comp
       ref={ref}
       className={cn(
-        "no-scrollbar -m-8 flex overflow-x-auto lg:-mx-16",
+        "no-scrollbar -m-8 flex overflow-x-auto bg-gradient-to-r px-8 [--_margin:2rem] md:-mx-16 md:px-16 md:[--_margin:4rem]",
         snap && "snap-x snap-mandatory md:snap-none",
-        "before:pointer-events-none before:sticky before:left-0 before:z-[1] before:-mr-4 before:w-8 before:shrink-0 before:bg-gradient-to-r before:from-gray-100 lg:before:w-16",
-        "after:pointer-events-none after:sticky after:right-0 after:z-[1] after:-ml-4 after:w-8 after:shrink-0 after:bg-gradient-to-l after:from-gray-100 lg:after:w-16",
         className,
       )}
+      style={{
+        webkitMaskImage:
+          "linear-gradient(to right, transparent, black var(--_margin), black calc(100% - var(--_margin)), transparent)",
+        maskImage:
+          "linear-gradient(to right, transparent, black var(--_margin), black calc(100% - var(--_margin)), transparent)",
+      }}
       {...props}
     >
       {children}
