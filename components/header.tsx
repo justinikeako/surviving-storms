@@ -223,9 +223,9 @@ export function Header() {
 				data-dark={isDark || undefined}
 				className="group fixed inset-x-0 z-20 data-[dark]:text-gray-50"
 			>
-				<div className="absolute inset-0 block bg-gray-100 from-black transition-colors mask-gradient-to-b group-data-[dark]:bg-gray-900/75" />
+				<div className="absolute inset-0 block bg-gray-100 from-black transition-colors mask-gradient-to-b group-data-[dark]:bg-gray-900/75 -z-10" />
 
-				<div className="relative flex h-20 items-center px-8 2xl:container md:px-16">
+				<div className="flex h-20 items-center px-8 2xl:container md:px-16">
 					<AnimatePresence>
 						{!introAnimationComplete && (
 							<motion.div
