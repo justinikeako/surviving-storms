@@ -24,7 +24,7 @@ export default function Home() {
         <Hero />
 
         {/* First Section */}
-        <section className="relative space-y-16 py-16 2xl:container">
+        <section className="relative space-y-16 px-8 py-16 2xl:container md:px-16">
           <ViewportRevealContainer asChild>
             <div className="mx-auto flex w-fit flex-col gap-12 py-8 sm:mr-0 sm:gap-8 md:flex-row md:items-center lg:w-full lg:justify-center lg:gap-16 2xl:justify-around">
               <ContainerOrchestratedReveal
@@ -181,7 +181,7 @@ export default function Home() {
         <ViewportReveal>
           <section
             data-header-dark
-            className="relative -mx-8 flex h-96 text-center text-gray-50 md:-mx-16"
+            className="relative flex h-96 text-center text-gray-50"
           >
             <div className="absolute inset-x-0 -z-10 h-96 bg-gray-950">
               <div className="absolute h-full w-full bg-[url(/map.svg)] bg-contain bg-fixed bg-center bg-no-repeat md:bg-cover" />
