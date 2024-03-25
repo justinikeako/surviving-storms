@@ -22,7 +22,7 @@ export const HorizontalScroller = forwardRef<
         className,
       )}
       style={{
-        webkitMaskImage:
+        WebkitMaskImage:
           "linear-gradient(to right, transparent, black var(--_margin), black calc(100% - var(--_margin)), transparent)",
         maskImage:
           "linear-gradient(to right, transparent, black var(--_margin), black calc(100% - var(--_margin)), transparent)",
