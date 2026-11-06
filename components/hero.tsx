@@ -8,6 +8,7 @@ import Link from "next/link";
 import { Icon } from "./icon";
 import Image from "next/image";
 import { OrchestratedLineReveal } from "./line-reveal";
+import { Fog } from "./fog";
 
 const MotionImage = motion(Image);
 
@@ -25,33 +26,38 @@ export function Hero() {
       data-header-dark
       className="flex h-[calc(100svh+4rem)] max-h-[64rem] flex-col justify-end gap-4 bg-gray-900 px-8 pb-32 text-gray-50 2xl:container sm:flex-row sm:items-end sm:justify-between md:px-16"
     >
-      <div className="absolute inset-x-0 top-0 h-[calc(100svh+4rem)] max-h-[64rem] overflow-hidden">
-        <motion.div style={{ scale }} className="h-full w-full">
-          <MotionImage
-            src="/hero.png"
-            alt="A dramatic view of a beach covered in palm trees destroyed by a hurricane."
-            fill
-            className="absolute origin-top object-cover object-center"
-            initial={{ scale: 1.25 }}
-            animate={{ scale: 1.0 }}
-            transition={{
-              type: "spring",
-              duration: 3,
-              bounce: 0,
-              delay: pauseDuration,
-            }}
-          />
-        </motion.div>
-
-        <div className="absolute inset-0 block from-gray-900 bg-radial-gradient-bl" />
-
-        <div className="absolute inset-x-0 bottom-0 h-16	bg-gradient-to-t from-gray-100"></div>
-
-        <div className="absolute inset-x-0 bottom-0 h-64 mask-gradient-to-t">
-          <div className="h-full from-transparent radial-farthest-side mask-radial-gradient-t mask-from-0 mask-to-100">
-            <div className="h-full bg-gray-100 mask-cover mask-luminance mask-center mask-[url(/painted-mask.webp)]"></div>
-          </div>
+      <div className="absolute inset-x-0 top-0 h-[calc(100svh+4rem)] max-h-[64rem]">
+        <div className="absolute inset-0 overflow-hidden">
+          <motion.div style={{ scale }} className="h-full w-full">
+            <MotionImage
+              src="/hero.png"
+              alt="A dramatic view of a beach covered in palm trees destroyed by a hurricane."
+              fill
+              className="absolute origin-top object-cover object-center"
+              initial={{ scale: 1.25 }}
+              animate={{ scale: 1.0 }}
+              transition={{
+                type: "spring",
+                duration: 3,
+                bounce: 0,
+                delay: pauseDuration,
+              }}
+            />
+          </motion.div>
         </div>
+
+        <div className="bg-ease-radial-bl absolute inset-0 block" />
+
+        {/* These overlap the next section by 1px, as the hero's height can land
+            on a fractional pixel and let the dark background show at its edge. */}
+        <div className="mask-ease-to-t absolute inset-x-0 -bottom-px h-16 bg-gray-100"></div>
+
+        <Fog
+          color="#f3f4f6"
+          clearing
+          protectCopy
+          className="absolute inset-x-0 -bottom-px h-64"
+        />
       </div>
 
       <div className="relative space-y-4">

@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { Fog } from "~/components/fog";
 import { Hero } from "~/components/hero";
+import { Smear } from "~/components/smear";
 import { ContainerLineReveal } from "~/components/line-reveal";
 import {
   ContainerOrchestratedReveal,
@@ -78,28 +80,32 @@ export default function Home() {
             <ul className="flex flex-wrap justify-around gap-8">
               <QuickLink
                 href="https://survivingstorms.com/workshops"
-                className="bg-lime-700 hover:bg-lime-600 active:bg-lime-800"
+                tone="lime"
+                seed={1}
                 delay={0}
               >
                 Workshops
               </QuickLink>
               <QuickLink
                 href="https://survivingstorms.com/publications"
-                className="bg-gray-800 hover:bg-gray-700 active:bg-gray-900"
+                tone="gray"
+                seed={2}
                 delay={0.1}
               >
                 Publications
               </QuickLink>
               <QuickLink
                 href="https://survivingstorms.com/interventions"
-                className="bg-red-600 hover:bg-red-500 active:bg-red-700"
+                tone="red"
+                seed={3}
                 delay={0.2}
               >
                 Interventions
               </QuickLink>
               <QuickLink
                 href="https://survivingstorms.com/podcasts"
-                className="bg-yellow-600 hover:bg-yellow-500 active:bg-yellow-700"
+                tone="yellow"
+                seed={4}
                 delay={0.3}
               >
                 Podcasts
@@ -183,10 +189,17 @@ export default function Home() {
             data-header-dark
             className="relative flex h-96 text-center text-gray-50"
           >
-            <div className="absolute inset-x-0 -z-10 h-96 bg-gray-950">
-              <div className="absolute h-full w-full bg-[url(/map.svg)] bg-contain bg-fixed bg-center bg-no-repeat md:bg-cover" />
+            {/* overflow-clip, as overflow-hidden would become the scroll container
+                that the parallax tracks, instead of the page */}
+            <div className="parallax-window absolute inset-x-0 -z-10 h-96 overflow-clip bg-gray-950">
+              <div className="parallax-layer absolute inset-x-0 top-1/2 aspect-[1600/1912] -translate-y-1/2 bg-[url(/map.svg)] bg-cover" />
 
-              <div className="absolute h-full w-full bg-gray-900 mask-cover mask-center mask-[url(/painted-mask.webp)]"></div>
+              <Fog
+                veil
+                seed={1}
+                color="#111827"
+                className="absolute inset-0"
+              />
             </div>
 
             <div className="m-auto">
@@ -424,14 +437,17 @@ export default function Home() {
 
         <footer className="relative mt-16 text-gray-50">
           <div className="flex flex-wrap items-end justify-between gap-4 px-8 py-8 2xl:container">
-            <div className="absolute inset-x-0 bottom-0 -z-10 h-[150%]">
-              <div className="absolute bottom-0 h-full w-full from-transparent to-gray-950 radial-farthest-side bg-radial-gradient-t mask-gradient-to-t"></div>
+            <div className="absolute inset-x-0 bottom-0 -z-10 h-[200%]">
+              {/* Keeps the footer text legible before the fog has faded in */}
+              <div className="mask-ease-to-t absolute inset-x-0 bottom-0 h-[70%] bg-gray-900 [--ease-start:70%]"></div>
 
-              <div className="absolute h-full w-full mask-gradient-to-t">
-                <div className="absolute bottom-0 h-[200%] w-full radial-farthest-side mask-radial-gradient-t mask-from-0 mask-to-100">
-                  <div className="h-full bg-gray-900 mask-cover mask-luminance mask-center mask-[url(/painted-mask.webp)]"></div>
-                </div>
-              </div>
+              <div className="absolute bottom-0 h-full w-full mask-ease-to-t from-transparent to-gray-950 radial-farthest-side bg-radial-gradient-t"></div>
+
+              <Fog
+                color="#111827"
+                seed={2}
+                className="absolute inset-0"
+              />
             </div>
 
             <div className="shrink-0 grow">
@@ -521,18 +537,24 @@ function ChristmasGhostCard({
 
 function QuickLink({
   delay,
+  tone,
+  seed,
+  children,
   ...props
-}: React.ComponentProps<typeof Link> & { delay: number }) {
+}: React.ComponentProps<typeof Link> &
+  Pick<React.ComponentProps<typeof Smear>, "tone" | "seed"> & {
+    delay: number;
+  }) {
   return (
     <li className="contents">
       <ContainerOrchestratedReveal asChild fadeOnly delay={delay}>
         <Link
           {...props}
-          className={cn(
-            "bg-gray flex h-16 w-64 shrink-0 items-center justify-center px-8 font-display text-xl uppercase text-gray-50 transition-colors mask-contain mask-luminance mask-center mask-no-repeat mask-[url(/brush-mask.webp)] active:transition-none",
-            props.className,
-          )}
-        />
+          className="group relative flex h-16 w-64 shrink-0 items-center justify-center px-8 font-display text-xl uppercase text-gray-50"
+        >
+          <Smear tone={tone} seed={seed} delay={delay} />
+          <span className="relative">{children}</span>
+        </Link>
       </ContainerOrchestratedReveal>
     </li>
   );

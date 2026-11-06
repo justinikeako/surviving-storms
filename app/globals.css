@@ -25,4 +25,62 @@
     display: none;
     -webkit-appearance: none;
   }
+
+  /* Eased gradients, as linear ones start and stop abruptly enough to see an edge.
+     Set --ease-start to hold the start solid for part of the way. */
+  .mask-ease-to-t,
+  .bg-ease-radial-bl {
+    --ease-stops:
+      rgb(var(--ease-rgb) / 1) calc(var(--ease-start, 0%) + (100% - var(--ease-start, 0%)) * 0),
+      rgb(var(--ease-rgb) / 0.987) calc(var(--ease-start, 0%) + (100% - var(--ease-start, 0%)) * 0.081),
+      rgb(var(--ease-rgb) / 0.951) calc(var(--ease-start, 0%) + (100% - var(--ease-start, 0%)) * 0.155),
+      rgb(var(--ease-rgb) / 0.896) calc(var(--ease-start, 0%) + (100% - var(--ease-start, 0%)) * 0.225),
+      rgb(var(--ease-rgb) / 0.825) calc(var(--ease-start, 0%) + (100% - var(--ease-start, 0%)) * 0.29),
+      rgb(var(--ease-rgb) / 0.741) calc(var(--ease-start, 0%) + (100% - var(--ease-start, 0%)) * 0.353),
+      rgb(var(--ease-rgb) / 0.648) calc(var(--ease-start, 0%) + (100% - var(--ease-start, 0%)) * 0.412),
+      rgb(var(--ease-rgb) / 0.55) calc(var(--ease-start, 0%) + (100% - var(--ease-start, 0%)) * 0.471),
+      rgb(var(--ease-rgb) / 0.45) calc(var(--ease-start, 0%) + (100% - var(--ease-start, 0%)) * 0.529),
+      rgb(var(--ease-rgb) / 0.352) calc(var(--ease-start, 0%) + (100% - var(--ease-start, 0%)) * 0.588),
+      rgb(var(--ease-rgb) / 0.259) calc(var(--ease-start, 0%) + (100% - var(--ease-start, 0%)) * 0.647),
+      rgb(var(--ease-rgb) / 0.175) calc(var(--ease-start, 0%) + (100% - var(--ease-start, 0%)) * 0.71),
+      rgb(var(--ease-rgb) / 0.104) calc(var(--ease-start, 0%) + (100% - var(--ease-start, 0%)) * 0.775),
+      rgb(var(--ease-rgb) / 0.049) calc(var(--ease-start, 0%) + (100% - var(--ease-start, 0%)) * 0.845),
+      rgb(var(--ease-rgb) / 0.013) calc(var(--ease-start, 0%) + (100% - var(--ease-start, 0%)) * 0.919),
+      rgb(var(--ease-rgb) / 0) calc(var(--ease-start, 0%) + (100% - var(--ease-start, 0%)) * 1);
+  }
+
+  .mask-ease-to-t {
+    --ease-rgb: 0 0 0;
+    mask-image: linear-gradient(to top, var(--ease-stops));
+  }
+
+  /* From gray-900 */
+  .bg-ease-radial-bl {
+    --ease-rgb: 17 24 39;
+    background-image: radial-gradient(farthest-corner at bottom left, var(--ease-stops));
+  }
+}
+
+/* Tied to scroll position by the browser, so it needs no JS and can run off the
+   main thread. Without support it simply stays centred and still. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .parallax-window {
+      view-timeline-name: --parallax-window;
+    }
+
+    .parallax-layer {
+      animation: parallax linear both;
+      animation-timeline: --parallax-window;
+    }
+
+    @keyframes parallax {
+      from {
+        transform: translateY(-62%);
+      }
+      to {
+        transform: translateY(-38%);
+      }
+    }
+  }
 }
