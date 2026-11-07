@@ -45,7 +45,10 @@ void main() {
   gl_Position = vec4(position, 0.0, 1.0);
 }`;
 
-export type Uniforms = Record<string, number | readonly number[]>;
+/** Numbers and vectors, or a Float32Array for an array of vec2s. */
+export type Uniforms = Record<string, number | readonly number[] | Float32Array>;
+/** Textures by the name of the sampler that reads them. */
+export type Textures = Record<string, WebGLTexture>;
 
 type Program = {
   program: WebGLProgram;
@@ -132,38 +135,55 @@ function run(
   width: number,
   height: number,
   uniforms: Uniforms,
-  texture?: WebGLTexture,
+  textures: Textures = {},
 ) {
   const entry = getProgram(context, fragmentShader);
   if (!entry) return false;
 
   context.useProgram(entry.program);
   context.viewport(0, 0, width, height);
-  if (texture) context.bindTexture(context.TEXTURE_2D, texture);
 
-  const all: Uniforms = { ...uniforms, resolution: [width, height] };
-  for (const name in all) {
+  const location = (name: string) => {
     if (!entry.locations.has(name)) {
       entry.locations.set(name, context.getUniformLocation(entry.program, name));
     }
-    const location = entry.locations.get(name)!;
+    return entry.locations.get(name)!;
+  };
+
+  let unit = 0;
+  for (const name in textures) {
+    context.activeTexture(context.TEXTURE0 + unit);
+    context.bindTexture(context.TEXTURE_2D, textures[name]);
+    context.uniform1i(location(name), unit++);
+  }
+  context.activeTexture(context.TEXTURE0);
+
+  const all: Uniforms = { ...uniforms, resolution: [width, height] };
+  for (const name in all) {
     const value = all[name];
-    if (typeof value === "number") context.uniform1f(location, value);
-    else if (value.length === 2) context.uniform2f(location, value[0], value[1]);
-    else context.uniform3f(location, value[0], value[1], value[2]);
+    if (typeof value === "number") context.uniform1f(location(name), value);
+    else if (value instanceof Float32Array) context.uniform2fv(location(name), value);
+    else if (value.length === 2) context.uniform2f(location(name), value[0], value[1]);
+    else context.uniform3f(location(name), value[0], value[1], value[2]);
   }
 
   context.drawArrays(context.TRIANGLES, 0, 3);
   return true;
 }
 
-/** Runs a shader once and keeps the result, for work too heavy to do per frame. */
-export function bakeTexture(
-  fragmentShader: string,
-  width: number,
-  height: number,
-  uniforms: Uniforms,
-) {
+export function contextLost() {
+  return !!gl && gl.isContextLost();
+}
+
+/** A texture that a shader can draw into, for another shader to read. */
+export type Target = {
+  texture: WebGLTexture;
+  framebuffer: WebGLFramebuffer;
+  width: number;
+  height: number;
+};
+
+export function createTarget(width: number, height: number): Target | null {
   const context = getContext();
   if (!context || context.isContextLost()) return null;
 
@@ -200,19 +220,40 @@ export function bakeTexture(
     texture,
     0,
   );
-  const baked = run(context, fragmentShader, width, height, uniforms);
+  context.clearColor(0, 0, 0, 0);
+  context.clear(context.COLOR_BUFFER_BIT);
   context.bindFramebuffer(context.FRAMEBUFFER, null);
-  context.deleteFramebuffer(framebuffer);
 
-  if (!baked) {
-    context.deleteTexture(texture);
-    return null;
-  }
-  return texture;
+  return { texture, framebuffer, width, height };
 }
 
-export function releaseTexture(texture: WebGLTexture) {
-  gl?.deleteTexture(texture);
+/** Runs a shader into a target. Returns false if the shader can't be used. */
+export function renderToTarget(
+  target: Target,
+  fragmentShader: string,
+  uniforms: Uniforms,
+  textures?: Textures,
+) {
+  const context = getContext();
+  if (!context) return false;
+  if (context.isContextLost()) return true; // Redone once it's restored.
+
+  context.bindFramebuffer(context.FRAMEBUFFER, target.framebuffer);
+  const ok = run(
+    context,
+    fragmentShader,
+    target.width,
+    target.height,
+    uniforms,
+    textures,
+  );
+  context.bindFramebuffer(context.FRAMEBUFFER, null);
+  return ok;
+}
+
+export function releaseTarget(target: Target) {
+  gl?.deleteTexture(target.texture);
+  gl?.deleteFramebuffer(target.framebuffer);
 }
 
 /** Draws in the shared context, then copies the result to a visible canvas. */
@@ -220,7 +261,7 @@ function paintTo(
   target: CanvasRenderingContext2D,
   fragmentShader: string,
   uniforms: Uniforms,
-  texture?: WebGLTexture,
+  textures?: Textures,
 ) {
   const context = getContext();
   if (!context || !glCanvas) return false;
@@ -231,7 +272,7 @@ function paintTo(
   if (glCanvas.width < width) glCanvas.width = width;
   if (glCanvas.height < height) glCanvas.height = height;
 
-  if (!run(context, fragmentShader, width, height, uniforms, texture)) {
+  if (!run(context, fragmentShader, width, height, uniforms, textures)) {
     return false;
   }
   // WebGL's origin is the bottom left, so that's the corner that was drawn to.
@@ -292,7 +333,7 @@ export type Surface = {
   /** Asks for `onFrame` to run on the next animation frame. */
   invalidate(): void;
   /** Runs a shader over this surface. Only valid during `onFrame`. */
-  paint(fragmentShader: string, uniforms: Uniforms, texture?: WebGLTexture): void;
+  paint(fragmentShader: string, uniforms: Uniforms, textures?: Textures): void;
   isVisible(): boolean;
   dispose(): void;
 };
@@ -388,8 +429,8 @@ export function mountSurface(
     invalidate() {
       if (target) schedule(draw);
     },
-    paint(fragmentShader, uniforms, texture) {
-      if (target && !paintTo(target, fragmentShader, uniforms, texture)) {
+    paint(fragmentShader, uniforms, textures) {
+      if (target && !paintTo(target, fragmentShader, uniforms, textures)) {
         options.onUnavailable();
       }
     },

@@ -4,16 +4,29 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "~/lib/utils";
 import {
   GLSL_NOISE,
-  bakeTexture,
+  type Target,
+  contextLost,
+  createTarget,
   hexToRgb,
   mountSurface,
-  releaseTexture,
+  releaseTarget,
+  renderToTarget,
   subscribeToPointer,
 } from "~/lib/webgl";
 
 const WIPE_RADIUS = 72;
 /** How long a wipe takes to settle back, in milliseconds. */
 const RECOVERY = 1100;
+/** The trail is soft, so it's kept at half the CSS resolution. */
+const TRAIL_SCALE = 0.5;
+/**
+ * How far the mouse must travel for the wipe to build most of the way up, in
+ * CSS pixels. Building up gradually, instead of appearing at full strength,
+ * keeps a fresh movement after a pause from popping in.
+ */
+const BUILD_DISTANCE = 55;
+/** Points of the mouse's path that can be added to the trail in one frame. */
+const PATH_POINTS = 8;
 
 // Condensation on a surface, and the marks a storm leaves in it. Positions are
 // in units of 100 CSS pixels, so marks keep their size on any screen.
@@ -51,7 +64,39 @@ float sweeps(vec2 p) {
         angle * (40.0 + hash(c + 6.0) * 50.0),
         radius * 0.7 + hash(c + 7.0) * 50.0
       ));
-      result = max(result, fan * smoothstep(0.52, 0.68, lines));
+      result = max(result, fan * smoothstep(0.5, 0.74, lines));
+    }
+  }
+  return result;
+}
+
+// Round drops scattered over a jittered grid, at most one to a cell, each its
+// own size. The size is that of a cell, and chance is how many hold a drop.
+float drops(vec2 p, float size, float chance, float salt) {
+  vec2 q = p / size;
+  vec2 cell = floor(q);
+  float result = 0.0;
+
+  for (int j = -1; j <= 1; j++) {
+    for (int i = -1; i <= 1; i++) {
+      vec2 c = cell + vec2(float(i), float(j));
+      if (hash(c + salt) > chance) continue;
+
+      vec2 centre = c + 0.2 + 0.6 * vec2(hash(c + salt + 1.0), hash(c + salt + 2.0));
+      float radius = 0.14 + 0.32 * hash(c + salt + 3.0);
+
+      // Stretched in a random direction, with a lumpy outline, so no two drops
+      // match. Neighbours that overlap merge into one irregular shape.
+      float a = hash(c + salt + 4.0) * 6.283;
+      vec2 offset = mat2(cos(a), -sin(a), sin(a), cos(a)) * (q - centre);
+      offset.x /= 1.0 + hash(c + salt + 5.0) * 0.9;
+      float lumps = (noise(q * 2.6 + c * 1.7 + salt) - 0.5) * 0.75
+        + (noise(q * 7.0 + salt) - 0.5) * 0.3;
+      float d = length(offset) / radius + lumps;
+
+      float softness = 0.3 + 0.45 * hash(c + salt + 6.0);
+      float strength = 0.5 + 0.5 * hash(c + salt + 7.0);
+      result = max(result, strength * (1.0 - smoothstep(1.0 - softness, 1.0, d)));
     }
   }
   return result;
@@ -101,12 +146,15 @@ void main() {
   float density = smoothstep(0.24, 0.6, fbm(p * 0.55 + warp * 1.4));
   density *= 0.72 + 0.55 * fbm(p * 3.0 + warp);
 
-  // Fine beads of water and tiny dry pits, heavier in some areas than others.
-  float patchiness = fbm(p * 1.6 + 9.0);
-  float beads = smoothstep(0.7, 0.82, noise(p * 62.0) + (patchiness - 0.5) * 0.35);
-  density = mix(density, 1.0, beads * 0.75 * smoothstep(-0.1, 0.3, density));
-  float pits = smoothstep(0.76, 0.86, noise(p * 38.0 + 40.0) + (0.5 - patchiness) * 0.3);
-  density *= 1.0 - pits * 0.22;
+  // Beads of water and small dry spots, heavier in some areas than others.
+  float patchiness = smoothstep(0.3, 0.7, fbm(p * 1.6 + 9.0));
+  float beads = max(
+    drops(p, 0.07, 0.42 * patchiness, 3.0),
+    drops(p + 7.3, 0.035, 0.3 * patchiness, 9.0) * 0.7
+  );
+  density = mix(density, 1.0, beads * 0.7 * smoothstep(-0.1, 0.3, density));
+  float pits = drops(p + 40.0, 0.05, 0.2 * (1.0 - patchiness), 17.0);
+  density *= 1.0 - pits * 0.2;
 
   // Sweeps invert what's beneath them, so they show on both thick and thin fog.
   density = mix(density, 1.0 - density * 0.85, sweeps(p) * 0.7);
@@ -133,42 +181,75 @@ void main() {
   gl_FragColor = vec4(color * alpha, alpha);
 }`;
 
+// Where the mouse has wiped the fog. Each frame fades what's there a little,
+// then adds to it along the path the mouse took since the last frame, so the
+// trail follows the hand exactly, builds up as it moves and recovers oldest
+// first. Kept in the red channel.
+const TRAIL_SHADER = `${GLSL_NOISE}
+uniform vec2 resolution;
+uniform sampler2D previous;
+uniform float scale;
+uniform float decay;
+uniform vec2 path[${PATH_POINTS}];
+uniform float count;
+uniform float gain;
+
+float toSegment(vec2 p, vec2 a, vec2 b) {
+  vec2 pa = p - a;
+  vec2 ba = b - a;
+  return length(pa - ba * clamp(dot(pa, ba) / max(dot(ba, ba), 0.0001), 0.0, 1.0));
+}
+
+void main() {
+  vec2 uv = gl_FragCoord.xy / resolution;
+  vec2 p = gl_FragCoord.xy / scale;
+
+  // Taking a fixed amount off as well means faint values can't round back up to
+  // themselves in an 8-bit texture and linger forever.
+  float wipe = max(texture2D(previous, uv).r * decay - 1.5 / 255.0, 0.0);
+
+  if (count > 0.5) {
+    float d = length(p - path[0]);
+    for (int i = 1; i < ${PATH_POINTS}; i++) {
+      if (float(i) >= count) break;
+      d = min(d, toSegment(p, path[i - 1], path[i]));
+    }
+    // An irregular edge, as a sleeve or a leaf wouldn't clear a clean shape.
+    d += (noise(p * 0.034) - 0.5) * 48.0 + (noise(p * 0.15) - 0.5) * 12.0;
+    float stamp = 1.0 - smoothstep(${(WIPE_RADIUS * 0.3).toFixed(1)}, ${WIPE_RADIUS.toFixed(1)}, d);
+    wipe += (1.0 - wipe) * stamp * gain;
+  }
+
+  gl_FragColor = vec4(wipe, 0.0, 0.0, 1.0);
+}`;
+
 // Far cheaper than the surface itself, so it can run on every frame: this only
-// samples the baked surface and wipes a path through it. The path is a capsule
-// between two points following the mouse at different speeds, so it stretches
-// along the direction of travel and closes up when the mouse stops.
+// samples the baked surface, thinning it wherever the trail is.
 const WIPE_SHADER = `${GLSL_NOISE}
 uniform vec2 resolution;
 uniform sampler2D surface;
+uniform sampler2D trail;
+uniform vec2 trailTexel;
 uniform float pixelRatio;
-uniform vec2 head;
-uniform vec2 tail;
-uniform float strength;
 uniform float anchored;
 
 void main() {
   vec2 uv = gl_FragCoord.xy / resolution;
-  vec2 p = gl_FragCoord.xy / pixelRatio;
+  float wipe = texture2D(trail, uv).r;
 
-  vec2 fromTail = p - tail;
-  vec2 path = head - tail;
-  vec2 offset = fromTail - path * clamp(dot(fromTail, path) / max(dot(path, path), 1.0), 0.0, 1.0);
+  vec2 texel = trailTexel * 2.0;
+  vec2 slope = vec2(
+    texture2D(trail, uv + vec2(texel.x, 0.0)).r - texture2D(trail, uv - vec2(texel.x, 0.0)).r,
+    texture2D(trail, uv + vec2(0.0, texel.y)).r - texture2D(trail, uv - vec2(0.0, texel.y)).r
+  );
 
-  // An irregular edge, as a sleeve or a leaf wouldn't clear a clean shape.
-  float d = length(offset)
-    + (noise(p * 0.034) - 0.5) * 48.0
-    + (noise(p * 0.15) - 0.5) * 12.0;
-
-  float wipe = 1.0 - smoothstep(${(WIPE_RADIUS * 0.3).toFixed(1)}, ${WIPE_RADIUS.toFixed(1)}, d);
-  float ridge = smoothstep(${(WIPE_RADIUS * 0.8).toFixed(1)}, ${WIPE_RADIUS.toFixed(1)}, d)
-    * (1.0 - smoothstep(${WIPE_RADIUS.toFixed(1)}, ${(WIPE_RADIUS * 1.4).toFixed(1)}, d));
-
-  // The surface is dragged slightly outward, and collects in a ridge at the edge.
-  vec2 direction = offset / max(length(offset), 1.0);
-  vec4 fog = texture2D(surface, uv - direction * wipe * strength * 9.0 * pixelRatio / resolution);
+  // The surface is dragged slightly outward from the path, and collects in a
+  // ridge along the edge of the trail.
+  vec4 fog = texture2D(surface, uv + slope * 56.0 * pixelRatio / resolution);
+  float ridge = clamp(length(slope) * 6.0, 0.0, 1.0) * (1.0 - wipe);
 
   // Banks stay solid at the bottom, where they meet the next section.
-  float amount = strength * mix(1.0, smoothstep(0.1, 0.3, uv.y), anchored);
+  float amount = mix(1.0, smoothstep(0.1, 0.3, uv.y), anchored);
   float alpha = min(fog.a * (1.0 - wipe * amount * 0.62 + ridge * amount * 0.14), 1.0);
   gl_FragColor = vec4(fog.rgb * (alpha / max(fog.a, 0.001)), alpha);
 }`;
@@ -206,74 +287,126 @@ export function Fog({
       "(prefers-reduced-motion: reduce)",
     ).matches;
 
-    let texture: WebGLTexture | null = null;
+    let surfaceTarget: Target | null = null;
+    // Two, as a shader can't read from the texture it's drawing into.
+    let trails: [Target, Target] | null = null;
     let disabled = false;
 
-    // The wipe's two points, in CSS pixels from the canvas's bottom left.
-    let pointer = { x: 0, y: 0 };
-    let head = { x: 0, y: 0 };
-    let tail = { x: 0, y: 0 };
-    let energy = 0;
-    let strength = 0;
+    // The mouse's path since the last frame, in CSS pixels from the canvas's
+    // bottom left. It starts at the previous frame's last point, for continuity.
+    type Point = { x: number; y: number };
+    let path: Point[] = [];
+    let last: Point | null = null;
+    let moved = false;
+    let lastMove = -Infinity;
     let lastTime = 0;
 
-    function discardTexture() {
-      if (texture) releaseTexture(texture);
-      texture = null;
+    function discardTargets() {
+      if (surfaceTarget) releaseTarget(surfaceTarget);
+      trails?.forEach(releaseTarget);
+      surfaceTarget = null;
+      trails = null;
+    }
+
+    function fail() {
+      // Losing the context is temporary. Anything else means the fog can't work.
+      if (!contextLost()) disabled = true;
+      return false;
+    }
+
+    function pathUniform() {
+      // Keeps the first and last points, and as many evenly spaced between.
+      const points =
+        path.length <= PATH_POINTS
+          ? path
+          : Array.from(
+              { length: PATH_POINTS },
+              (_, i) =>
+                path[Math.round((i * (path.length - 1)) / (PATH_POINTS - 1))],
+            );
+      const values = new Float32Array(PATH_POINTS * 2);
+      points.forEach((point, i) => values.set([point.x, point.y], i * 2));
+
+      let distance = 0;
+      for (let i = 1; i < path.length; i++) {
+        distance += Math.hypot(path[i].x - path[i - 1].x, path[i].y - path[i - 1].y);
+      }
+      return {
+        path: values,
+        count: moved ? points.length : 0,
+        gain: 1 - Math.exp(-distance / BUILD_DISTANCE),
+      };
     }
 
     const surface = mountSurface(canvas, {
       margin: "200px",
+      // The fine detail is drawn once, so it can afford full resolution on phones.
+      maxRatio: 3,
       onFrame(now, { width, height, ratio }) {
         if (disabled) return false;
 
-        texture ??= bakeTexture(SURFACE_SHADER, width, height, {
-          pixelRatio: ratio,
-          color: hexToRgb(color),
-          seed,
-          clearing: +clearing,
-          protectCopy: +protectCopy,
-          veil: +veil,
-        });
-        if (!texture) {
-          disabled = true;
-          return false;
+        if (!surfaceTarget) {
+          surfaceTarget = createTarget(width, height);
+          if (!surfaceTarget) return fail();
+          const baked = renderToTarget(surfaceTarget, SURFACE_SHADER, {
+            pixelRatio: ratio,
+            color: hexToRgb(color),
+            seed,
+            clearing: +clearing,
+            protectCopy: +protectCopy,
+            veil: +veil,
+          });
+          if (!baked) return fail();
+        }
+
+        if (!trails) {
+          const trailWidth = Math.max(1, Math.round((width / ratio) * TRAIL_SCALE));
+          const trailHeight = Math.max(1, Math.round((height / ratio) * TRAIL_SCALE));
+          const a = createTarget(trailWidth, trailHeight);
+          const b = createTarget(trailWidth, trailHeight);
+          if (!a || !b) return fail();
+          trails = [a, b];
         }
 
         const delta = lastTime ? Math.min(now - lastTime, 50) : 16;
         lastTime = now;
-        const follow = (rate: number) => 1 - Math.exp(-delta / rate);
-        head.x += (pointer.x - head.x) * follow(50);
-        head.y += (pointer.y - head.y) * follow(50);
-        tail.x += (pointer.x - tail.x) * follow(280);
-        tail.y += (pointer.y - tail.y) * follow(280);
-        energy *= Math.exp(-delta / RECOVERY);
-        strength += (energy - strength) * follow(110);
+
+        const [previous, next] = trails;
+        const updated = renderToTarget(
+          next,
+          TRAIL_SHADER,
+          { scale: TRAIL_SCALE, decay: Math.exp(-delta / RECOVERY), ...pathUniform() },
+          { previous: previous.texture },
+        );
+        if (!updated) return fail();
+        trails = [next, previous];
+        path = last ? [last] : [];
+        moved = false;
 
         surface.paint(
           WIPE_SHADER,
           {
             pixelRatio: ratio,
-            head: [head.x, head.y],
-            tail: [tail.x, tail.y],
-            strength,
             anchored: veil ? 0 : 1,
+            trailTexel: [1 / next.width, 1 / next.height],
           },
-          texture,
+          { surface: surfaceTarget.texture, trail: next.texture },
         );
         setReady(true);
 
-        const moving = energy > 0.015 || strength > 0.015;
-        if (!moving) lastTime = 0;
-        return moving;
+        // By then the trail has faded to nothing.
+        const active = now - lastMove < RECOVERY * 4;
+        if (!active) lastTime = 0;
+        return active;
       },
       onUnavailable() {
         // The canvas just stays hidden, as the fog is only decoration.
         disabled = true;
       },
-      onResize: discardTexture,
+      onResize: discardTargets,
       onRestore() {
-        texture = null;
+        surfaceTarget = null;
+        trails = null;
       },
     });
 
@@ -282,30 +415,30 @@ export function Fog({
       : subscribeToPointer((x, y) => {
           if (disabled || !surface.isVisible()) return;
           const rect = canvas.getBoundingClientRect();
-          const next = { x: x - rect.left, y: rect.bottom - y };
+          const point = { x: x - rect.left, y: rect.bottom - y };
           const inside =
-            next.x > -WIPE_RADIUS &&
-            next.x < rect.width + WIPE_RADIUS &&
-            next.y > -WIPE_RADIUS &&
-            next.y < rect.height + WIPE_RADIUS;
+            point.x > -WIPE_RADIUS &&
+            point.x < rect.width + WIPE_RADIUS &&
+            point.y > -WIPE_RADIUS &&
+            point.y < rect.height + WIPE_RADIUS;
 
-          if (inside) {
-            // Starting fresh, so don't streak in from where the mouse last left.
-            if (energy < 0.02) {
-              head = { ...next };
-              tail = { ...next };
-            }
-            const moved = Math.hypot(next.x - pointer.x, next.y - pointer.y);
-            energy = Math.min(1, energy + Math.min(moved, 80) / 220);
-            surface.invalidate();
+          if (!inside) {
+            // Coming back in starts a new path, instead of joining up with this one.
+            last = null;
+            return;
           }
-          pointer = next;
+          if (!last) path = [];
+          path.push(point);
+          last = point;
+          moved = true;
+          lastMove = performance.now();
+          surface.invalidate();
         });
 
     return () => {
       unsubscribe?.();
       surface.dispose();
-      discardTexture();
+      discardTargets();
     };
   }, [color, seed, clearing, protectCopy, veil]);
 
